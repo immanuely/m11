@@ -1,0 +1,198 @@
+// import 'dart:io';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_background_service/flutter_background_service.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'dart:async';
+// import 'dart:ui';
+
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await initializeService();
+//   runApp(const HomeScreen());
+// }
+
+// void onStart(ServiceInstance service) async {
+//   DartPluginRegistrant.ensureInitialized();
+
+//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//       FlutterLocalNotificationsPlugin();
+
+//   service.on('stopService').listen((event) {
+//     service.stopSelf();
+//   });
+
+//   int sum = 10;
+//   Timer.periodic(const Duration(seconds: 1), (timer) async {
+//     sum--;
+//     // print(service is AndroidServiceStartType);
+//     try {
+//       flutterLocalNotificationsPlugin.show(
+//           888,
+//           'Countdown Service',
+//           'Remaining $sum times',
+//           const NotificationDetails(
+//             android: AndroidNotificationDetails(
+//               'foreground',
+//               'Foreground Service',
+//               icon: 'ic_bg_service_small',
+//               ongoing: true,
+//             ),
+//           ));
+//     } catch (e) {
+//       print('Error : $e');
+//     }
+//     print(sum);
+//     if (sum == 0) {
+//       FlutterBackgroundService().startService();
+//     }
+//     print('Background Service : $sum');
+
+//     service.invoke(
+//       'update',
+//       {
+//         "count": sum,
+//       },
+//     );
+//   });
+// }
+
+// Future<bool> onIosBackground(ServiceInstance service) async {
+//   return true;
+// }
+
+// Future<void> initializeService() async {
+//   const AndroidNotificationChannel channel = AndroidNotificationChannel(
+//     'foreground',
+//     'Foreground Service',
+//     description: 'This channel is used for important notifications',
+//     importance: Importance.low,
+//   );
+
+//   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//       FlutterLocalNotificationsPlugin();
+
+//   await flutterLocalNotificationsPlugin
+//       .resolvePlatformSpecificImplementation<
+//           AndroidFlutterLocalNotificationsPlugin>()
+//       ?.createNotificationChannel(channel);
+
+//   final service = FlutterBackgroundService();
+
+//   await service.configure(
+//     iosConfiguration: IosConfiguration(
+//       autoStart: false,
+//       onForeground: onStart,
+//       onBackground: onIosBackground,
+//     ),
+//     androidConfiguration: AndroidConfiguration(
+//       onStart: onStart,
+//       autoStart: false,
+//       isForegroundMode: true,
+//       notificationChannelId: 'foreground',
+//       initialNotificationTitle: 'Foreground Service',
+//       initialNotificationContent: 'Initializing',
+//       foregroundServiceNotificationId: 888,
+//     ),
+//   );
+//   service.startService();
+// }
+
+// // class MyApp extends StatelessWidget {
+// //   const MyApp({super.key});
+// // void backgroundCompute(args) {
+// //   print('background compute callback');
+// //   print('calculating fibonanci from background process');
+
+// //   int first = 0;
+// //   int second = 1;
+// //   for (var i = 2; i <= 50; i++) {
+// //     var tmp = second;
+// //     second = first + second;
+// //     first = tmp;
+// //     sleep(const Duration(milliseconds: 200));
+// //     print('first : $first, second : $second.');
+// //   }
+// //   print('Selesai fibo');
+// // }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return MaterialApp(
+// //       title: 'Flutter Demo 12',
+// //       theme: ThemeData(
+// //         primarySwatch: Colors.blue,
+// //       ),
+// //       home: Scaffold(
+// //         body: Center(
+// //           child: ElevatedButton(
+// //               onPressed: () {
+// //                 compute(backgroundCompute, null);
+// //               },
+// //               child: const Text('Hitung fibo')),
+// //         ),
+// //       ),
+// //     );
+// //   }
+// // }
+
+// class HomeScreen extends StatefulWidget {
+//   const HomeScreen({super.key});
+
+//   @override
+//   State<HomeScreen> createState() => _HomeScreenState();
+// }
+
+// class _HomeScreenState extends State<HomeScreen> {
+//   String text = 'Stop Service';
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Flutter Demo 12',
+//       theme: ThemeData(
+//         primarySwatch: Colors.blue,
+//       ),
+//       home: Scaffold(
+//         body: Center(
+//           child: Column(
+//             children: [
+//               StreamBuilder(
+//                   stream: FlutterBackgroundService().on('update'),
+//                   builder: (context, snapshot) {
+//                     if (!snapshot.hasData) {
+//                       return const Text(
+//                         '60 s',
+//                         style: TextStyle(fontSize: 40),
+//                       );
+//                     }
+//                     final data = snapshot.data!;
+//                     String? count = '${data['count']}s';
+//                     return Text(
+//                       count,
+//                       style: const TextStyle(fontSize: 40),
+//                     );
+//                   }),
+//               ElevatedButton(
+//                 onPressed: () async {
+//                   final service = FlutterBackgroundService();
+//                   var isRunning = await service.isRunning();
+//                   if (isRunning) {
+//                     service.invoke('stopService');
+//                     text = 'Restart Service';
+//                   } else {
+//                     service.startService();
+//                     text = 'Stop Service';
+//                   }
+
+//                   setState(() {});
+//                 },
+//                 child: Text(text),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
